@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZoopChat – Friends</title>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Modern CSS -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Body and base */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0e131a;
+  color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header with title + icons + search */
+header {
+  background-color: #202c33;
+  color: #fff;
+  padding: 15px 20px;
+  font-size: 22px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+}
+
+header i {
+  font-size: 24px;
+  cursor: pointer;
+  margin-left: 15px;
+  color: #25D366;
+  transition: color 0.2s ease;
+}
+
+header i:hover {
+  color: #128c4a;
+}
+
+/* Search bar */
+#searchBar {
+  flex-grow: 1;
+  margin-left: 20px;
+  position: relative;
+}
+
+#searchBar input {
+  width: 100%;
+  padding: 8px 40px 8px 12px;
+  border-radius: 20px;
+  border: none;
+  font-size: 16px;
+  background-color: #1f2c34;
+  color: #e9edef;
+  outline: none;
+}
+
+#searchBar i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8696a0;
+}
+
+/* Friends list container */
+#friendsList {
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Each friend */
+.friend {
+  display: flex;
+  align-items: center;
+  background-color: #1f2c34;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.friend:hover {
+  background-color: #2a3b45;
+}
+
+/* Friend avatar */
+.friend img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 15px;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+/* Online status indicator on avatar */
+.friend.online img {
+  border-color: #25D366;
+  box-shadow: 0 0 6px #25D366;
+}
+
+/* Friend details: name and last message */
+.friend-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.friend-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e9edef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friend-thought {
+  font-size: 14px;
+  color: #8696a0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right side: time, unread badge, typing indicator */
+.friend-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-width: 60px;
+  font-size: 12px;
+  color: #8696a0;
+}
+
+/* Last seen or time */
+.friend-time {
+  margin-bottom: 6px;
+}
+
+/* Typing indicator */
+.friend-typing {
+  color: #25D366;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Unread messages badge */
+.friend-unread {
+  background-color: #25D366;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 0 6px #25D366;
+}
+
+/* No users placeholder */
+.no-users {
+  text-align: center;
+  color: #aaa;
+  margin-top: 50px;
+  font-style: italic;
+}
+
+  </style>
+</head>
+
+<body>
+ <header class="chat-header">
+  ZoopChat – Friends
+  <i class="bi bi-person-plus-fill add-friend-icon"></i>
+</header>
+
+<div id="friend" class="friend-list">
+  Loading friends...
+</div>
+
+
+  <script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+const firebaseConfig = {
+      apiKey: "AIzaSyDT9ydIZyM1hhUPvTfNsZSIL8fl1u5oqrw",
+      authDomain: "zoopchat-2d76f.firebaseapp.com",
+      projectId: "zoopchat-2d76f",
+      storageBucket: "zoopchat-2d76f.appspot.com",
+      messagingSenderId: "725112976926",
+      appId: "1:725112976926:web:0464fa3e7d8101dfb5e00f"
+    };
+  
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore(app);
+
+const friendsList = document.getElementById("friend");
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "register.html";
+    return;
+  }
+
+  try {
+    const snapshot = await getDocs(collection(db, "users"));
+    friendsList.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.uid === user.uid) return;
+
+      const friend = document.createElement("div");
+      friend.className = "friend";
+      friend.innerHTML = `
+        <img src="${data.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=random`}" alt="${data.name}" />
+        <div>
+          <div class="friend-name">${data.name}</div>
+          <div class="friend-thought">${data.thought || ''}</div>
+        </div>
+      `;
+
+      friend.onclick = () => {
+  // Only store UID (or email if you prefer)
+  localStorage.setItem("chatWithUID", data.uid);
+
+  window.location.href = "chat.html";
+};
+
+
+
+      friendsList.appendChild(friend);
+    });
+
+    if (friendsList.innerHTML === "") {
+      friendsList.innerHTML = "<p>No other users found.</p>";
+    }
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+    friendsList.innerHTML = "<p>Error loading friends list.</p>";
+  }
+});
+
+  </script>
+</body>
+</html>

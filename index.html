@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>ZoopChat Splash</title>
+ 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: linear-gradient(120deg, #4facfe 0%, #00f2fe 100%);
+  font-family: 'Poppins', sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  user-select: none;
+}
+
+.splash-container {
+  text-align: center;
+}
+
+.app-name {
+  font-size: 4.5rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  margin-bottom: 60px;
+  animation: floatText 4s ease-in-out infinite;
+  user-select: none;
+}
+
+/* Floating up and down effect */
+@keyframes floatText {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+/* Circular loader */
+.loader {
+  width: 80px;
+  height: 80px;
+  border: 8px solid rgba(255, 255, 255, 0.3);
+  border-top: 8px solid white;
+  border-radius: 50%;
+  animation: spin 1.6s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.logo {
+  width: 200px;      /* Adjust size as needed */
+  height: 200px;
+  margin-bottom: 20px;
+  animation: floatLogo 4s ease-in-out infinite;
+  user-select: none;
+  border-radius: 100%;
+}
+
+/* Optional: make the logo float gently like the app name */
+@keyframes floatLogo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+
+  </style>
+</head>
+<body>
+    <div class="splash-container">
+        <img src="logo.png" alt="ZoopChat Logo" class="logo" />
+        <h1 class="app-name">ZoopChat</h1>
+        <div class="loader"></div>
+      </div>
+      
+
+  
+  <script type='module' src="splash.js"></script>
+</body>
+</html>
